@@ -11,8 +11,9 @@ yarn-debug.log*
 yarn-error.log*
 
 #enviroment variables
-.enviroment
+.env
 .env.local
+.env.*.local
 #editor-specific files
 #.vscode/
 .idea/

@@ -4,15 +4,24 @@
   "description": "*Node.js 22 ou superior - conferir a versão: node - v",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "watch": "tsc --watch",
+    "start:watch": "concurrently \"npm run watch\" \"node --watch dist/index.js\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^5.2.0"
+    "dotenv": "^17.2.3",
+    "express": "^5.2.0",
+    "mysql2": "^3.15.3",
+    "typeorm": "^0.3.28"
   },
   "devDependencies": {
+    "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.5",
+    "concurrently": "^9.2.1",
     "ts-node": "^10.9.2"
   }
 }
