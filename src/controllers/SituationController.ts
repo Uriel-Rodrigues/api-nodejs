@@ -14,13 +14,10 @@ router.get("/:id", async (req: Request, res: Response) => {
     try {
         //obter o id da situação a partir dos parametros de rquisição 
         const {id} = req.params;
-
         //obter o repositorio da entidade situations
         const situationRepository = AppDataSource.getRepository(Situation)
-
         //buscar a situação no banco de dados pelo ID
         const situation = await situationRepository.findOneBy({id: parseInt(id)});
-        
         //verificar se a situação foi encontrada
         if(!situation){
             res.status(404).json({
@@ -36,8 +33,6 @@ router.get("/:id", async (req: Request, res: Response) => {
         res.status(500).json({
             menssage: "error ao carregar a situação!"
         })
-
-
     }
 });
 
