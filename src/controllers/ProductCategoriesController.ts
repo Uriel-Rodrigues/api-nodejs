@@ -4,7 +4,6 @@ import express, { request, Request, response, Response} from "express";
 import { AppDataSource } from "../data-source";
 //importar a endidade
 import { ProductCategory } from "../entity/product_categories";
-import { Situation } from "../entity/situation";
 
 //criar a aplicação Express
 const router = express.Router();
@@ -84,7 +83,43 @@ router.post("/", async (req: Request, res: Response) => {
         }) 
 
     }
+});
 
+//criari rota para editar regitros usando put
+//endereço para acessar a API atraves de aplicação externa: http://127.0.0.1:8080/product-categories/:id
+router.put("/:id", async (req: Request, res: Response) =>{
+    try {
+        //obter informação da URL da aplicação
+        var {id} = req.params;
+        //obter informação do corpo da aplicação
+        const data = req.body;
+        //criar repositorio da entidade product categories
+        const productCategoriesRepository = AppDataSource.getRepository(ProductCategory);
+        //procurar registro pelo ID
+        const productCategory = await productCategoriesRepository.findOneBy({id: parseInt(id)});
+        //retornar mensagem caso não encontrado
+        if(!productCategory) {
+            res.status(404).json({
+                menssage: "erro categoria de produto não encontrada"
+            });
+            return;
+        };
+        //editar registro
+        productCategoriesRepository.merge(productCategory, data)
+        //salvar registro
+        const updateProductCategory = productCategoriesRepository.save(productCategory) 
+        //retornar mensagem de suceso
+        res.status(200).json({
+            menssage: "registro de categoria atualizada com sucesso",
+            Category: productCategory
+        });
+    }
+    catch(erro){
+        console.log(erro)
+        res.status(500).json({
+            menssage: "categoria de produto não encontrada"
+        })
+    }
 });
 
 //exportar a instrução que está dentro da constante router 

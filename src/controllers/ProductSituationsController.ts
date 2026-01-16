@@ -91,5 +91,43 @@ router.post("/", async (req: Request, res: Response) => {
     }
 });
 
+//criar rota para editar registro usando PUT
+//endereço para acessar API pela aplicação extena usando PUT: http://127.0.0.1:8080/product-situations/:id
+router.put("/:id",async(req: Request, res: Response) => {
+    try{
+        //capturandos requisições da URL
+        var {id} = req.params
+        //capturando requisições do corpo
+        const data = req.body
+        //obter repositorio da entidade productSituation
+        const productSituationRepository = AppDataSource.getRepository(ProductSituation)
+        //procurar situação pelo ID
+        const productSituation = await productSituationRepository.findOneBy({id: parseInt(id)}) 
+        //retornar mensagem caso registro n seja encontrado 
+        if(!productSituation){
+            res.status(404).json({
+                menssage: "situação de produto não encontrada"
+            });
+            return;
+        } 
+        //realizar alteração 
+        productSituationRepository.merge(productSituation, data)
+        //salvar alteração 
+        const updateProductSituation = await productSituationRepository.save(productSituation) 
+        //retornar mensagem se sucesso
+        res.status(200).json ({
+            menssage: "categoria de produto atualizada com sucesso",
+            productSituation: updateProductSituation 
+        }) 
+    }
+    catch(erro){
+        console.log(erro)
+        res.status(500).json({
+            menssage: "error ao modificar situação de produto"
+        });
+    }
+
+})
+
 //exportar a instrução que está dentro da constante router 
 export default router

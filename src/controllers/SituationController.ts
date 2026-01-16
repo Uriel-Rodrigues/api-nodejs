@@ -86,5 +86,42 @@ router.post("/", async (req: Request, res: Response) => {
     }
 });
 
+//criar rota para editar registros usando PUT
+//endereço para acessar API pela aplicação externa usando PUT: http://127.0.0.1:8080/situation/:id
+router.put("/:id", async (req: Request, res: Response) => {
+    try{
+        //receber dados da URL da requisição
+        const {id} = req.params
+        //receber dados do corpo da requisição
+        const data = req.body
+        //obter repositorio da entidade situations
+        const situationRepository = AppDataSource.getRepository(Situation)
+        //buscar situação no banco de dados pelo ID
+        const situation = await situationRepository.findOneBy({id:parseInt(id)})
+        //verificar se a situação foi encontrada
+        if(!situation){
+            res.status(404).json ({
+                menssage: "erro situação não encontrada"
+            })
+            return;
+        }
+        // realizar alteração do registro
+        situationRepository.merge(situation, data)
+        //salvar alteração
+        const updateSituation = await situationRepository.save(situation)
+        //retornar mensagem de sucesso
+        res.status(200).json({
+            menssage: "registro atalçizado com sucesso",
+            situation: updateSituation
+        });
+    }
+    catch(erro) {
+        console.log(erro)
+        res.status(500).json ({
+            menssage: "erro situação não encontrada" 
+        });
+    }
+})
+
 //exportar a instrução que está dentro da constante router 
 export default router
