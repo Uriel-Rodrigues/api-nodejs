@@ -121,7 +121,41 @@ router.put("/:id", async (req: Request, res: Response) => {
             menssage: "erro situação não encontrada" 
         });
     }
-})
+});
+
+//criar rota para deletar registros usando delete
+//endereço para acessar API pela aplicação externa usando PUT: http://127.0.0.1:8080/situation/:id
+router.delete("/:id", async (req: Request, res: Response) =>{
+    try {
+        //obter informação pela URL
+        var {id} = req.params
+        //criar repositoio situation
+        const situationRepository = AppDataSource.getRepository(Situation);
+        //procuar situação pelo id
+        const situation = await situationRepository.findOneBy({id:parseInt(id)});
+        //verificar se existe
+        if(!situation) {
+            res.status(404).json({
+                menssage: "situação não encontrada"
+            });
+            return;
+        };
+        //deletar situação
+        await situationRepository.remove(situation)
+        //mensagem de sucesso 
+        res.status(200).json({
+            menssage: "situação deletada com sucesso!",
+            situation: situation
+        });
+    }
+    catch (erro){
+        console.log(erro)
+        res.status(500).json({
+            menssage: "erro ao apagar situação"
+        });
+    };
+});
+
 
 //exportar a instrução que está dentro da constante router 
 export default router

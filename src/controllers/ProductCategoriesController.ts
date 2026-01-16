@@ -122,5 +122,38 @@ router.put("/:id", async (req: Request, res: Response) =>{
     }
 });
 
+//criar rota para deletar registros usando delete
+//endereço para acessar API pela aplicação externa usando PUT: http://127.0.0.1:8080/product-categories/:id
+router.delete("/:id", async (req: Request, res: Response) => {
+    try {
+        //obter informação da URL
+        var {id} = req.params
+        //criar repositorio da entidade product-categories
+        const productCategoriesRepository = AppDataSource.getRepository(ProductCategory)
+        //pesquisar no repositorio pelo ID
+        const productCategory = await productCategoriesRepository.findOneBy({id:parseInt(id)}) 
+        //verificar se existe
+        if(!productCategory){
+            res.status(404).json ({
+                menssage: "erro categoria de produto não encontrada"
+            });
+            return;
+        };
+        //deletar registro
+        await productCategoriesRepository.remove(productCategory)
+        //menssagem de sucesso
+        res.status(200).json ({
+            menssage: "categoria de produto deletado com sucesso",
+            category: productCategory
+        }); 
+    }
+    catch(erro) {
+        console.log(erro)
+        res.status(500).json ({
+            menssage: "erro ao deletar categoria de produto"
+        });
+    };
+});
+
 //exportar a instrução que está dentro da constante router 
 export default router

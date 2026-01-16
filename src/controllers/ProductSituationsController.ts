@@ -48,10 +48,10 @@ router.get("/", async (req: Request, res: Response) => {
         const productSituationRepository = AppDataSource.getRepository(ProductSituation)
 
         //recuperar todas as situações de produtos do banco 
-        const productsituations = await productSituationRepository.find()
+        const productSituations = await productSituationRepository.find()
 
         //retornar as situações como resposta
-        res.status(200).json(productsituations)
+        res.status(200).json(productSituations)
     }
     catch (error){
         //retornar resposta de erro
@@ -126,7 +126,37 @@ router.put("/:id",async(req: Request, res: Response) => {
             menssage: "error ao modificar situação de produto"
         });
     }
-
+})
+//criar rota para deletar registros usando delete
+//endereço para acessar API pela aplicação externa usando PUT: http://127.0.0.1:8080/situation/:id
+router.delete("/:id", async (req: Request, res:Response) => {
+    try {
+        //captar elemento da URL
+        var {id} = req.params 
+        //criar repositorio da entidade pruduct situation
+        const productSituationRepository = AppDataSource.getRepository(ProductSituation)
+        //verificar se existe registro pelo ID
+        const productSituation = await productSituationRepository.findOneBy({id:parseInt(id)})
+        //mensagem de retorno caso não encontrado
+        if(!productSituation) {
+            res.status(404).json({
+                menssage: "erro situação de produto não encontrada"
+            });
+            return;
+        };
+        //deletar registro
+        await productSituationRepository.remove(productSituation)
+        //mensagem de sucesso 
+        res.status(200).json({
+            menssage: "situação de prosuto deletada com sucesso!"
+        })
+    }
+    catch(erro){
+        console.log(erro)
+        res.status(500).json({
+            menssage: "erro ao deletar situação de produto"
+        })
+    }
 })
 
 //exportar a instrução que está dentro da constante router 
