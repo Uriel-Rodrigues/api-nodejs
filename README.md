@@ -30,7 +30,10 @@ Executar as migration para criar as tabelas no banco de dados.
 ```
 npx typeorm migration:run -d dist/data-source.js
 ```
-
+executar as seeds para cadastrar registros de teste nas tabelas no banco de dados
+```
+node dist/run-seeds.js
+```
 
 ## Sequencia para criar o projeto 
 1- Criar um novo arquivo packaje 
