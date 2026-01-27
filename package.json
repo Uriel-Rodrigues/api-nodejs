@@ -16,7 +16,8 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.0",
     "mysql2": "^3.15.3",
-    "typeorm": "^0.3.28"
+    "typeorm": "^0.3.28",
+    "yup": "^1.7.1"
   },
   "devDependencies": {
     "@types/dotenv": "^6.1.1",

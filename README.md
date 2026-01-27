@@ -112,3 +112,7 @@ Executar as migration para criar as tabelas no banco de dados.
 ```
 npx typeorm migration:run -d dist/data-source.js
 ```
+validar formulario
+```
+npm i yup
+```

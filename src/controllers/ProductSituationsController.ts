@@ -4,11 +4,15 @@ import express, { request, Request, response, Response} from "express";
 import { AppDataSource } from "../data-source";
 //importar a entidade
 import { ProductSituation } from "../entity/product_situations";
+//impotando serviço de paginação
+import { PaginationService } from "../services/PaginationService";
+//importar biblioteca yup
+import * as yup from 'yup';
 
 //criar a aplicação Express
 const router = express.Router();
 
-//criar rota para visualizar situação especifica de produdo
+//criar rota para VISUALIZAR situação especifica de produdo
 //endereço para acessar a apiatraves da aplicação externa com o vermo GET: http: 127.0.0.1:8080/product-situations/:id
 router.get("/:id", async (req: Request, res: Response) => {
     try {
@@ -40,18 +44,19 @@ router.get("/:id", async (req: Request, res: Response) => {
 });
 
 //Criar rotar para LISTAR registros de situações de produtos ´resentes no banco 
-// endereço para acessar a api atravez da aplicação externa com o verbo GET: http;//127.0.0.1:8080/product-situations
-
+// endereço para acessar a api atravez da aplicação externa com o verbo GET: http;//127.0.0.1:8080/product-situations?page=1&limit=10
 router.get("/", async (req: Request, res: Response) => {
     try {
         //obtrer o repositorio a entidade product_situations
-        const productSituationRepository = AppDataSource.getRepository(ProductSituation)
-
-        //recuperar todas as situações de produtos do banco 
-        const productSituations = await productSituationRepository.find()
-
-        //retornar as situações como resposta
-        res.status(200).json(productSituations)
+        const productSituationRepository = AppDataSource.getRepository(ProductSituation);
+        //Receber o número da pagina e definir pagina 1 como padrão
+        const page = Number(req.query.page) || 1;
+        //definir o nuero de registros por pagina
+        const limit = Number(req.query.limit) || 10;
+        //aplicar o serviço de paginação 
+        const result = await PaginationService.paginate(productSituationRepository,page,limit, {id: "DESC"})
+        //retornar a res´posta com os dados e informações da paginação 
+        res.status(200).json (result)
     }
     catch (error){
         //retornar resposta de erro
@@ -62,15 +67,39 @@ router.get("/", async (req: Request, res: Response) => {
     }
 });
 
-//criar a porta GET principal
+//Criar rotar para CADASTRAR registros de situações de produtos ´resentes no banco
 //req(rquisição), res(resposta)
 router.post("/", async (req: Request, res: Response) => {
     //
     try{
         //receber os dados enviados no corpo da requisição
         var data = req.body
+
+        //validar dados usando yup
+        const schema = yup.object().shape({
+            name: yup
+            .string()
+            .required("o campo 'nome' é pbrigatorio!")
+            .min(3,"o campo precisa ter pelo menos 3 caracteres!")
+        })
+        //verificar se os dados passaram pela validação
+        await schema.validate(data,{abortEarly:false} ) 
+
         // criar a product situation do repositorio
         const productSituationRepository = AppDataSource.getRepository(ProductSituation)
+        
+        // recuperar o valor do banco de dados com o valor da coluna name
+        const existProductSituation = await productSituationRepository.findOne({
+            where: {name: data.name}
+        }) 
+        //verificar se ja exite uma situação de produto com o mesmo nome
+        if(existProductSituation){
+            res.status(201).json({
+                menssage: "ja existe uma situação de produto com esse nome!"
+            })
+            return;
+        }
+
         // criar um novo registro de situação de produto
         const newProductSituation = productSituationRepository.create(data)
         //salvar o registro no banco de dados
@@ -83,6 +112,13 @@ router.post("/", async (req: Request, res: Response) => {
 
     }
     catch (error){
+        //retornar mensagem em caso de erro na verificação
+        if(error instanceof yup.ValidationError) {
+            res.status(400).json ({
+                menssage: error.errors
+            });
+            return;
+        }
         //retornar resposta de erro
         console.log(error);
         res.status(500).json({
@@ -91,7 +127,7 @@ router.post("/", async (req: Request, res: Response) => {
     }
 });
 
-//criar rota para editar registro usando PUT
+//criar rota para EDITAR registro usando PUT
 //endereço para acessar API pela aplicação extena usando PUT: http://127.0.0.1:8080/product-situations/:id
 router.put("/:id",async(req: Request, res: Response) => {
     try{
@@ -99,6 +135,16 @@ router.put("/:id",async(req: Request, res: Response) => {
         var {id} = req.params
         //capturando requisições do corpo
         const data = req.body
+        //validar dados usando yup
+        const schema = yup.object().shape({
+            name: yup
+            .string()
+            .required("o campo de 'nome' é obrigatorio")
+            .min(3, "é necessario que o registro tenha pelo menos 3 caracteres")
+        })
+        //verificar se os dados passaram na verificação
+        await schema.validate(data, {abortEarly:false})
+
         //obter repositorio da entidade productSituation
         const productSituationRepository = AppDataSource.getRepository(ProductSituation)
         //procurar situação pelo ID
@@ -120,14 +166,21 @@ router.put("/:id",async(req: Request, res: Response) => {
             productSituation: updateProductSituation 
         }) 
     }
-    catch(erro){
-        console.log(erro)
+    catch(error){
+    //mander mensagem de retorno caso tenha erro na verificação
+        if(error instanceof yup.ValidationError){
+            res.status(400).json ({
+                menssage: error.errors
+            })
+            return;
+        }
+        console.log(error)
         res.status(500).json({
             menssage: "error ao modificar situação de produto"
         });
     }
 })
-//criar rota para deletar registros usando delete
+//criar rota para DELETAR registros usando delete
 //endereço para acessar API pela aplicação externa usando PUT: http://127.0.0.1:8080/situation/:id
 router.delete("/:id", async (req: Request, res:Response) => {
     try {

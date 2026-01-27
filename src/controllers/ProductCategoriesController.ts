@@ -4,11 +4,15 @@ import express, { request, Request, response, Response} from "express";
 import { AppDataSource } from "../data-source";
 //importar a endidade
 import { ProductCategory } from "../entity/product_categories";
+//importando seviso de paginação
+import { PaginationService } from "../services/PaginationService";
+//importando biblioteca yup
+import * as yup from 'yup'
 
 //criar a aplicação Express
 const router = express.Router();
 
-//Criar rota para listar registros especificaos presentes na entidade
+//Criar rota para LISTAR registros ESPECIFICOS presentes na entidade
 //endereço para acessar api atraves de aplicação externa com verbo GET: http://127.0.0.1:8080/product-categories/:id
 router.get("/:id", async (req: Request, res: Response) => {
     try {
@@ -37,18 +41,21 @@ router.get("/:id", async (req: Request, res: Response) => {
 });
 
 
-//criar rota para listar registros presentes na entidade
+//criar rota para LISTAR registros presentes na entidade
 //endereço para acessar api atraves de aplicação externa com verbo GET: http://127.0.0.1:8080/product-categories
 router.get("/", async (req: Request, res: Response) => {
     try {
         //obter o repositorio da entidade product-categories
         const productCategoriesRepository = AppDataSource.getRepository(ProductCategory);
 
-        //recuperar todos os registros do repositorio
-        const productCategory = await productCategoriesRepository.find();
-        
-        //retornar as categorias de produtos com resposta
-        res.status(200).json(productCategory);
+        //receber o numero de paginas e determinar a pagina 1 como padrão
+        const page = Number(req.query.page) || 1
+        //definir o numero de registros por pagina
+        const limit = Number(req.query.limit) || 10
+        //aplicar o serviço de paginação 
+        const result = await PaginationService.paginate(productCategoriesRepository,page,limit, {id: "DESC"})
+        // Retornar resposta com os dados e informações da paginação
+        res.status(200).json(result)  
     }
     catch(error) {
         console.log(500).json ({
@@ -57,18 +64,42 @@ router.get("/", async (req: Request, res: Response) => {
     }
 });
 
-//criar a porta POST principal
+//rota para CADASTRAR registros na entidade pelo verbo POST
 //req(rquisição), res(resposta)
 router.post("/", async (req: Request, res: Response) => {
     try {
         //captando elementos enviados pelas 
-        var data = req.body   
+        var data = req.body
+        
+        //validar registro usando yup
+        const schema = yup.object().shape({
+            name:yup
+            .string()
+            .required("o campo 'nome' é obrigatorio! ")
+            .min(3, "o campo 'nome' deve conter pelo menos 3 caracteres")
+        });
+        //verificar se os dados passaram na validação 
+        await schema.validate(data,{abortEarly:false});
+
         //criar uma categoria do repositorio de categoria
-        const CategoryRepository = AppDataSource.getRepository(ProductCategory)
+        const categoryRepository = AppDataSource.getRepository(ProductCategory)
+        
+        //recuperar o valor do banco de dados com o valor da coluna nome
+        const existProductCategories = await categoryRepository.findOne({
+            where: {name: data.name}
+        })
+        //verificar se ja existe um registro com o mesmo nome
+        if(existProductCategories){
+            res.status(401).json({
+                menssage: "ja exisre uma categoria de produto com esse nome!"
+            })
+            return;
+        }
+        
         //criat um novo registro de categoria (dados simulados)
-        const newCategory = CategoryRepository.create(data)
+        const newCategory = categoryRepository.create(data)
         //salvar o registro no banco de dados
-        await CategoryRepository.save(newCategory)
+        await categoryRepository.save(newCategory)
         //retornar resposta de sucesso
         res.status(201).json ({
             menssage: "categoria cadastrada com sucesso!",
@@ -76,6 +107,14 @@ router.post("/", async (req: Request, res: Response) => {
         });  
     }
     catch (error) {
+        //retornar mensagem de erro na validação caso acorra
+        if(error instanceof yup.ValidationError){
+            res.status(400).json ({
+                menssage: error.errors
+            })
+            return;
+        }
+
         //retornar resposta de erro
         console.log(error);
         res.status(500).json({
@@ -85,7 +124,7 @@ router.post("/", async (req: Request, res: Response) => {
     }
 });
 
-//criari rota para editar regitros usando put
+//criari rota para EDITAR regitros usando put
 //endereço para acessar a API atraves de aplicação externa: http://127.0.0.1:8080/product-categories/:id
 router.put("/:id", async (req: Request, res: Response) =>{
     try {
@@ -93,6 +132,17 @@ router.put("/:id", async (req: Request, res: Response) =>{
         var {id} = req.params;
         //obter informação do corpo da aplicação
         const data = req.body;
+        
+        //validar dados com yup
+        const  schema = yup.object().shape({
+            name: yup
+            .string()
+            .required("o campo 'nome' é obrigatorio") 
+            .min(3, "o campo 'nome' deve conter pelo menos 3 caracteres")
+        })
+        //verificar se dados passaram na validação
+        await schema.validate(data, {abortEarly:false}) 
+
         //criar repositorio da entidade product categories
         const productCategoriesRepository = AppDataSource.getRepository(ProductCategory);
         //procurar registro pelo ID
@@ -114,8 +164,15 @@ router.put("/:id", async (req: Request, res: Response) =>{
             Category: productCategory
         });
     }
-    catch(erro){
-        console.log(erro)
+    catch(error){
+        //retornar mensagem em caso de erro na verificação
+        if(error instanceof yup.ValidationError) {
+            res.status(400).json({
+                menssage: error.errors
+            });
+            return;
+        }
+        console.log(error)
         res.status(500).json({
             menssage: "categoria de produto não encontrada"
         })
