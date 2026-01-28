@@ -116,3 +116,8 @@ validar formulario
 ```
 npm i yup
 ```
+intalar dependencia para permitir requisições externas 
+```
+npm i cors
+npm install --save-dev @types/cors (instalar dependencia para compilar o cors)
+```
