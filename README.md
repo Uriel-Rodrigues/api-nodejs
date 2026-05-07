@@ -4,7 +4,10 @@
 
 ## como rodar o projeto baixado
 Duplicar o arquivo ".env.exemple" e renomear para ".env" <br>
-alterar no arquivo .env as credencias do banco de dados 
+alterar no arquivo .env as credencias do banco de dados<br>
+alterar no arquivo .env a chave JWT_SECRET para que o projeto tenha uma chave unica<br>
+alterar no arquivo env as credenciais do servidor responsavek em enviar o email <br>
+ 
 1 instalar todas as dependencias 
 ´´´
 npm install
@@ -120,4 +123,35 @@ intalar dependencia para permitir requisições externas
 ```
 npm i cors
 npm install --save-dev @types/cors (instalar dependencia para compilar o cors)
+```
+
+Converter o slug automaticamente antes de salvar no banco de dados.
+```
+npm install slugify
+```
+instalar o modulo para criptografar senha
+```
+npm install --save bcryptjs
+```
+instalar os tipos de bcryptjs
+```
+npm install --save-dev @types/bcryptjs
+``` 
+
+instalar a dependencia JWT para manipular token de autenticação
+```
+npm install jsonwebtoken
+```
+istalar os tipos do jsonwebtoken
+```
+npm i --save-dev @types/jsonwebtoken
+```
+
+instalar a biblioteca nodemailer para enviar email
+```
+npm install nodemailer
+```
+instaler os tipos do nodemailer
+```
+npm instal --save-dev @types/nodemailer
 ```

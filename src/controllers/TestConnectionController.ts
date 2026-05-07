@@ -5,9 +5,9 @@ const router = express.Router();
 
 //criar a porta GET principal
 //req(rquisição), res(resposta)
-router.get("/", (req: Request, res: Response) => {
+router.get("/test-connection", (req: Request, res: Response) => {
     res.status(200).json({
-        menssage: "conexão realizada com sucesso!"
+        menssage: "conexão com a API realizada com sucesso!"
     })
 });
 

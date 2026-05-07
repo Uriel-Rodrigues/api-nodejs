@@ -1,5 +1,5 @@
 //Importa a biblioteca Express
-import express, { request, Request, response, Response} from "express";
+import express, { Request, Response} from "express";
 //importar coneção com banco de dados
 import { AppDataSource } from "../data-source";
 //importar a entidade
@@ -8,13 +8,17 @@ import { ProductSituation } from "../entity/product_situations";
 import { PaginationService } from "../services/PaginationService";
 //importar biblioteca yup
 import * as yup from 'yup';
+import { Not } from "typeorm";
+//importar verificação de token 
+import { verifyToken } from "../middlewares/authMiddleware";
+
 
 //criar a aplicação Express
 const router = express.Router();
 
 //criar rota para VISUALIZAR situação especifica de produdo
 //endereço para acessar a apiatraves da aplicação externa com o vermo GET: http: 127.0.0.1:8080/product-situations/:id
-router.get("/:id", async (req: Request, res: Response) => {
+router.get("/product-situations/:id",verifyToken, async (req: Request, res: Response) => {
     try {
         //coletar dados enviados da URL da requisição
         const {id} = req.params
@@ -45,7 +49,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 
 //Criar rotar para LISTAR registros de situações de produtos ´resentes no banco 
 // endereço para acessar a api atravez da aplicação externa com o verbo GET: http;//127.0.0.1:8080/product-situations?page=1&limit=10
-router.get("/", async (req: Request, res: Response) => {
+router.get("/product-situations",verifyToken, async (req: Request, res: Response) => {
     try {
         //obtrer o repositorio a entidade product_situations
         const productSituationRepository = AppDataSource.getRepository(ProductSituation);
@@ -55,7 +59,7 @@ router.get("/", async (req: Request, res: Response) => {
         const limit = Number(req.query.limit) || 10;
         //aplicar o serviço de paginação 
         const result = await PaginationService.paginate(productSituationRepository,page,limit, {id: "DESC"})
-        //retornar a res´posta com os dados e informações da paginação 
+        //retornar a resposta com os dados e informações da paginação 
         res.status(200).json (result)
     }
     catch (error){
@@ -69,7 +73,7 @@ router.get("/", async (req: Request, res: Response) => {
 
 //Criar rotar para CADASTRAR registros de situações de produtos ´resentes no banco
 //req(rquisição), res(resposta)
-router.post("/", async (req: Request, res: Response) => {
+router.post("/product-situations/create",verifyToken, async (req: Request, res: Response) => {
     //
     try{
         //receber os dados enviados no corpo da requisição
@@ -129,7 +133,7 @@ router.post("/", async (req: Request, res: Response) => {
 
 //criar rota para EDITAR registro usando PUT
 //endereço para acessar API pela aplicação extena usando PUT: http://127.0.0.1:8080/product-situations/:id
-router.put("/:id",async(req: Request, res: Response) => {
+router.put("/product-situations/:id", verifyToken, async(req: Request, res: Response) => {
     try{
         //capturandos requisições da URL
         var {id} = req.params
@@ -156,6 +160,19 @@ router.put("/:id",async(req: Request, res: Response) => {
             });
             return;
         } 
+        //verifiar se ja existe outra situação com o mesmo nome
+        const existeSituation = await productSituationRepository.findOne({
+            where: {
+                name: data.name,
+                id: Not(parseInt(id)) //desconsidera o id da propria busca 
+            }
+        })
+        if(existeSituation) {
+            res.status(400).json({
+                menssage: "ja existe uma situação de produto com esse nome "
+            })
+            return
+        }  
         //realizar alteração 
         productSituationRepository.merge(productSituation, data)
         //salvar alteração 
@@ -182,7 +199,7 @@ router.put("/:id",async(req: Request, res: Response) => {
 })
 //criar rota para DELETAR registros usando delete
 //endereço para acessar API pela aplicação externa usando PUT: http://127.0.0.1:8080/situation/:id
-router.delete("/:id", async (req: Request, res:Response) => {
+router.delete("/product-situations/:id",verifyToken, async (req: Request, res:Response) => {
     try {
         //captar elemento da URL
         var {id} = req.params 

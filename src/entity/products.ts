@@ -7,17 +7,22 @@ export class Product { //nome da classe
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column({
-        type: "varchar",
-        length: 255,
-        unique: true
-    })
-        name!: string;
+    @Column({type: "varchar",length: 255,unique: true})
+    name!: string;
     
-    @Column({type: "timestamp", default: () => "COURRENT_TIMESTAMP"})
+    @Column({unique: true})
+    slug!: string
+
+    @Column({type: "varchar", length:300})
+    description!: string;
+
+    @Column()
+    price!: number;
+    
+    @Column({type: "timestamp", default: () => "CURRENT_TIMESTAMP"})
     createdAt!: Date;
 
-    @Column({type: "timestamp", default: () => "CORRENT_TIMESTAMP", onUpdate: "COURRENT_TIMESTAMP"})
+    @Column({type: "timestamp", default: () => "CURRENT_TIMESTAMP", onUpdate: "CURRENT_TIMESTAMP"})
     updatedAt!: Date;
 
     //relacionamento ManyToOne com a tabela product_categories
@@ -29,6 +34,4 @@ export class Product { //nome da classe
     @ManyToOne(() => ProductSituation, (situation) => situation.products )
     @JoinColumn({name: "productSituationId"})
     situation!: ProductSituation
-
-
 };

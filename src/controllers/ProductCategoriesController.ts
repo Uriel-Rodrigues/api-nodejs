@@ -8,13 +8,16 @@ import { ProductCategory } from "../entity/product_categories";
 import { PaginationService } from "../services/PaginationService";
 //importando biblioteca yup
 import * as yup from 'yup'
+import { Not } from "typeorm";
+//importar verificação de token 
+import { verifyToken } from "../middlewares/authMiddleware";
 
 //criar a aplicação Express
 const router = express.Router();
 
 //Criar rota para LISTAR registros ESPECIFICOS presentes na entidade
 //endereço para acessar api atraves de aplicação externa com verbo GET: http://127.0.0.1:8080/product-categories/:id
-router.get("/:id", async (req: Request, res: Response) => {
+router.get("/product-categories/:id",verifyToken, async (req: Request, res: Response) => {
     try {
         //obtendo informação encaminhada pela URL 
         var {id} = req.params
@@ -43,7 +46,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 
 //criar rota para LISTAR registros presentes na entidade
 //endereço para acessar api atraves de aplicação externa com verbo GET: http://127.0.0.1:8080/product-categories
-router.get("/", async (req: Request, res: Response) => {
+router.get("/product-categories",verifyToken, async (req: Request, res: Response) => {
     try {
         //obter o repositorio da entidade product-categories
         const productCategoriesRepository = AppDataSource.getRepository(ProductCategory);
@@ -58,7 +61,7 @@ router.get("/", async (req: Request, res: Response) => {
         res.status(200).json(result)  
     }
     catch(error) {
-        console.log(500).json ({
+        res.status(500).json ({
             menssage: "error ao listar categorias"
         })
     }
@@ -66,7 +69,7 @@ router.get("/", async (req: Request, res: Response) => {
 
 //rota para CADASTRAR registros na entidade pelo verbo POST
 //req(rquisição), res(resposta)
-router.post("/", async (req: Request, res: Response) => {
+router.post("/product-categories/create",verifyToken, async (req: Request, res: Response) => {
     try {
         //captando elementos enviados pelas 
         var data = req.body
@@ -126,7 +129,7 @@ router.post("/", async (req: Request, res: Response) => {
 
 //criari rota para EDITAR regitros usando put
 //endereço para acessar a API atraves de aplicação externa: http://127.0.0.1:8080/product-categories/:id
-router.put("/:id", async (req: Request, res: Response) =>{
+router.put("/product-categories/:id",verifyToken, async (req: Request, res: Response) =>{
     try {
         //obter informação da URL da aplicação
         var {id} = req.params;
@@ -154,6 +157,19 @@ router.put("/:id", async (req: Request, res: Response) =>{
             });
             return;
         };
+        //verificar se ja existe uma categoria com o mesmo nome
+        const existCategory = await productCategoriesRepository.findOne({
+            where:{
+                name: data.name,
+                id: Not(parseInt(id))// exclui o proprio registro da busca
+            }
+        })
+        if(existCategory) {
+            res.status(400).json({
+                menssage: "ja existe uma Categoria com esse nome"
+            })
+            return
+        }
         //editar registro
         productCategoriesRepository.merge(productCategory, data)
         //salvar registro
@@ -181,7 +197,7 @@ router.put("/:id", async (req: Request, res: Response) =>{
 
 //criar rota para deletar registros usando delete
 //endereço para acessar API pela aplicação externa usando PUT: http://127.0.0.1:8080/product-categories/:id
-router.delete("/:id", async (req: Request, res: Response) => {
+router.delete("/product-categories/:id",verifyToken, async (req: Request, res: Response) => {
     try {
         //obter informação da URL
         var {id} = req.params

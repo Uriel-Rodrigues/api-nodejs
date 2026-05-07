@@ -1,5 +1,5 @@
 //Importa a biblioteca Express
-import express, {Request, response, Response} from "express";
+import express, {Request, Response} from "express";
 //importar conxão com banco de dados
 import { AppDataSource } from "../data-source";
 //importar a entidade
@@ -8,14 +8,17 @@ import { Situation } from "../entity/situation";
 import { PaginationService } from "../services/PaginationService";
 //importar biblioteca para validar os dados antes de cadastrar e editar 
 import * as yup from 'yup';
+import { Not } from "typeorm";
+//importar verificação de token 
+import { verifyToken } from "../middlewares/authMiddleware";
 
 //criar a aplicação Express
 const router = express.Router();
 
 //criar a rota para LISTAR os registros de situações presentes no banco 
 //endereço para acessar a api atraves da aplicação externa com o verbo GET: 
-// http://127.0.0.1:8080/situations?page=1&limit=10
-router.get("/", async (req: Request, res: Response) => {
+// http://127.0.0.1:8080/situation?page=1&limit=10
+router.get("/situation",verifyToken, async (req: Request, res: Response) => {
     try{
         //obter o repositorio da entidade situation
         const situationRepository = AppDataSource.getRepository(Situation);
@@ -32,8 +35,8 @@ router.get("/", async (req: Request, res: Response) => {
         res.status(200).json(result)
         return;
     }
-    catch (erro){
-        console.log(erro)
+    catch (error){
+        console.log(error)
         res.status(500).json ({
             menssage: "error ao listar registros de situações"
         })
@@ -43,7 +46,7 @@ router.get("/", async (req: Request, res: Response) => {
 // rota para VISUALIZAR uma situação especifica
 //endereço para acessar a api atraves da aplicação externa com o verbo GET: 
 //http:127.0.0.1:8080/situations/:id
-router.get("/:id", async (req: Request, res: Response) => {
+router.get("/situation/:id",verifyToken, async (req: Request, res: Response) => {
     try {
         //obter o id da situação a partir dos parametros de rquisição 
         const {id} = req.params;
@@ -61,8 +64,9 @@ router.get("/:id", async (req: Request, res: Response) => {
         res.status(200).json(situation);
         return;
     }
-    catch (erro){
-        console.log(erro)
+    catch (error){
+        //retornar mensagem de erro
+        console.log(error)
         res.status(500).json({
             menssage: "error ao carregar a situação!"
         })
@@ -71,11 +75,11 @@ router.get("/:id", async (req: Request, res: Response) => {
 
 //criar a porta para CADASTRAR REGISTROS verbo POST
 //req(rquisição), res(resposta)
-router.post("/", async (req: Request, res: Response) => {
+router.post("/situation/create",verifyToken, async (req: Request, res: Response) => {
     try {
         //Receber os dados enviados no corpo da requisição 
         var data = req.body
-        //validar os dados utilizando o tup
+        //validar os dados utilizando o yup
         const schema = yup.object().shape({
             nameSituation: yup
             .string()
@@ -131,7 +135,7 @@ router.post("/", async (req: Request, res: Response) => {
 
 //criar rota para EDITAR registros usando PUT
 //endereço para acessar API pela aplicação externa usando PUT: http://127.0.0.1:8080/situation/:id
-router.put("/:id", async (req: Request, res: Response) => {
+router.put("/situation/:id",verifyToken, async (req: Request, res: Response) => {
     try{
         //receber dados da URL da requisição
         const {id} = req.params
@@ -146,7 +150,6 @@ router.put("/:id", async (req: Request, res: Response) => {
         });
         //verificar se os dados passaram pela validação
         await schema.validate(data,{abortEarly:false})  
-
         //obter repositorio da entidade situations
         const situationRepository = AppDataSource.getRepository(Situation)
         //buscar situação no banco de dados pelo ID
@@ -158,35 +161,49 @@ router.put("/:id", async (req: Request, res: Response) => {
             })
             return;
         }
+        // verificar se ja existe uma situação com o mesmo nome mas que não seja o registro atual
+        const existingSituation = await situationRepository.findOne({
+            where: {
+                nameSituation: data.nameSituation,
+                id: Not(parseInt(id))// exclui o proprio registro da busca
+            }
+        })
+       if (existingSituation) {
+            res.status(400).json({
+                message: "Já existe uma situação cadastrada com esse nome!",
+            });
+            return;
+        }
+
         // realizar alteração do registro
         situationRepository.merge(situation, data)
         //salvar alteração
         const updateSituation = await situationRepository.save(situation)
         //retornar mensagem de sucesso
         res.status(200).json({
-            menssage: "registro atalçizado com sucesso",
+            menssage: "registro atualizado com sucesso",
             situation: updateSituation
         });
     }
     catch(error) {
-        //retonro de mensagem em casso de erro de validação
+
+        //retonro de mensagem em caso de erro de validação
         if(error instanceof yup.ValidationError){
             res.status(400).json({
                 menssage: error.errors
             })
             return;
         }
-
-        console.log(erro)
-        res.status(500).json ({
-            menssage: "erro situação não encontrada" 
+        //retorna erro em caso de falha
+        res.status(500).json({
+            menssage: "erro ao editar situação" 
         });
     }
 });
 
 //criar rota para DELETAR registros usando delete
 //endereço para acessar API pela aplicação externa usando PUT: http://127.0.0.1:8080/situation/:id
-router.delete("/:id", async (req: Request, res: Response) =>{
+router.delete("/situation/:id",verifyToken, async (req: Request, res: Response) =>{
     try {
         //obter informação pela URL
         var {id} = req.params
@@ -210,6 +227,7 @@ router.delete("/:id", async (req: Request, res: Response) =>{
         });
     }
     catch (erro){
+        // retornar mensagem de erro 
         console.log(erro)
         res.status(500).json({
             menssage: "erro ao apagar situação"

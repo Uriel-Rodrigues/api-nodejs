@@ -1,4 +1,5 @@
 import { MigrationInterface, QueryRunner, Table, TableForeignKey } from "typeorm";
+import { string } from "yup";
 
 export class CreateProductsTable1766085419348 implements MigrationInterface {
 
@@ -7,12 +8,25 @@ export class CreateProductsTable1766085419348 implements MigrationInterface {
     name:"products",
     columns: [
         {
+            name: "name",
+            type: "varchar",
+            isUnique: true
+        },
+        {
             name: "id",
             type: "int",
             isUnique: true,
             isPrimary: true,
             isGenerated: true,
             generationStrategy: "increment"
+        },
+        {
+            name: "description",
+            type: "varchar"
+        },
+        {
+            name: "price",
+            type: "float"
         },
         {
             name: "productSituationId",

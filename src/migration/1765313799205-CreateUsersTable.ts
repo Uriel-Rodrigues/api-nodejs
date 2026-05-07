@@ -32,7 +32,7 @@ export class CreateUsersTable1765313799205 implements MigrationInterface {
                     default: "CURRENT_TIMESTAMP"
                 },
                 {
-                    name: "updateAt",
+                    name: "updatedAt",
                     type: "timestamp",
                     default: "CURRENT_TIMESTAMP",
                     onUpdate: "CURRENT_TIMESTAMP", 
