@@ -7,6 +7,7 @@ interface PaginationResult<T> {
     currentPage: number,
     lastPage: number,
     totalRecords: number
+    relations?: string[] //permite passar reções como array de strings
 }
 
 //Define uma classe de serviço para implementar a lógica de paginação
@@ -16,7 +17,8 @@ export class PaginationService{
         repository: Repository<T>,
         page: number = 1,
         limit: number = 10,
-        order: FindOptionsOrder<T> = {}
+        order: FindOptionsOrder<T> = {},
+        relations?: string[] //receber relations como array de string
     ): Promise <PaginationResult<T>>{
 
         //consta o total de registros no repositorio para determinar a quantidade total de paginas
@@ -34,6 +36,7 @@ export class PaginationService{
             take: limit,
             skip: offset,
             order: order,
+            relations: relations // usar os relacionametos passados dinamicamente (1 ou mais tabelas)
         })
         //retornar o resultado da paginação em um formato estruturado 
         return {

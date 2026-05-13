@@ -25,7 +25,7 @@ router.get("/product",verifyToken, async (req: Request, res: Response) => {
         //definir o numero de registro por pagina
         const limit = Number(req.query.limit) || 10 
         //usar o serviço de paginação
-        const result = await PaginationService.paginate(productRepository, page, limit, {id:"DESC"})
+        const result = await PaginationService.paginate(productRepository, page, limit, {id:"DESC"},["category", "situation"])
         //retornar a resposta com os dados e informações da paginação
         res.status(200).json(result)
         return
@@ -53,6 +53,7 @@ router.get("/product/:slug",verifyToken, async (req: Request, res: Response) => 
         //const existeProduct = await productRepository.findOneBy({id: parseInt(id)})
         //procurar produto pelo slug
         const existeProduct = await productRepository.findOne({
+            relations:["category","situation"],
             where: {slug}
         }) 
         //verificar se o produto existe 

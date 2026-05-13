@@ -28,7 +28,7 @@ router.get("/user", verifyToken,  async(req: Request, res: Response) => {
         //definir o numero de registros por pagina
         const limit =Number(req.query.limit) || 10
         //usar o serviso de paginação
-        const result = await PaginationService.paginate(userRepository,page,limit,{id:"DESC"})
+        const result = await PaginationService.paginate(userRepository,page,limit,{id:"DESC"}, ["situation"])
         //retornar a resposta com os dados e informções da pagina
         res.status(200).json(result)
         return
@@ -49,7 +49,11 @@ router.get("/user/:id", async(req: Request, res: Response) => {
         //obter o repositorio da entidade User
         const userRepository = AppDataSource.getRepository(User)
         //buscar usuario no banco de dados pelo ID
-        const user = await userRepository.findOneBy({id:parseInt(id)})
+        const user = await userRepository.findOne({
+            relations: ["situation"],
+            where: {id:parseInt(id)}
+
+        })
         //verificar se o Ususario foi encontrado 
         if(!user){
             res.status(404).json ({
@@ -68,7 +72,7 @@ router.get("/user/:id", async(req: Request, res: Response) => {
 })
 
 //rota para CADASTRAR um usuario - verpo POST
-router.post("/user/create", async (req: Request, res: Response) => {
+router.post("/user/create",verifyToken, async (req: Request, res: Response) => {
     try {
         //receber os dados que vem no corpo da requisição
         var data = req.body 
@@ -105,9 +109,9 @@ router.post("/user/create", async (req: Request, res: Response) => {
         // data.password = await bcrypt.hash(data.password,10)
 
         //criar um novo registro 
-        const newUser = userRepository.create(data)
+        userRepository.create(data)
         //salvar o registro
-        await userRepository.save(newUser)
+        const newUser = await userRepository.save(userRepository.create(data))
         //resposta de sucesso
         res.status(201).json({
             menssage: "novo usuario cadastrado com sucesso",

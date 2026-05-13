@@ -15,6 +15,7 @@ import bcrypt from "bcryptjs"
 //importa a biblioteca para enviar email 
 import nodemailer from "nodemailer"
 import { verifyToken } from "../middlewares/authMiddleware";
+import { Http2ServerRequest } from "http2";
 
 
 //criar a aplicação Express
@@ -70,6 +71,82 @@ router.get("/validate-token", verifyToken, (req: Request, res:Response) => {
         userId: (req as any).user.id //o id do usuario autenticado 
     })
 })
+
+//criar rota publica para cadastrar o usuario 
+//endereço para acessa a api atraves da aplicação estra com o verbo post 
+//http://localhost:8080/new-users
+// a apllicação esterna deve indicar que esta enviando os dados em formato de objeto:content-type: aplication/json
+//dados em formato de objeto
+/*
+{
+    "name":"cesar",
+    "email": "userEmail@email.com.br",
+    "password": "123456A#s",
+    "situation": 1
+}
+*/
+router.post("/users", async (req: Request, res: Response) => {
+    try {
+        //receber os dados que vem no corpo da requisição
+        var data = req.body 
+        //fazer validação usando yup
+        const schema = yup.object().shape({
+            name: yup
+            .string()
+            .required("o campo nome é obrigatorio!")
+            .min(3, "o nome deve ter no minimo 3 caracteres para ser valido"),
+            email: yup
+            .string()
+            .required("o campo email é obrigatorio!")
+            .email(),
+            password: yup.string().required("o campo senha é obrigatorio!").min(6, "o campo deve ter no minimo 6 caracteres!"),
+            situation: yup
+            .number()
+            .required("indique o id da situação")
+        })
+        //verificar de os dados passaram pela validação
+        await schema.validate(data, {abortEarly: false}) 
+        //capiturar repositorio 
+        const userRepository = AppDataSource.getRepository(User)
+        //bucar no repositorio um registro com o mesmo email
+        const user = await userRepository.findOne({
+            where: {email: data.email} 
+        })
+        //verificar se existe um registro com mesmo email
+        if(user){
+            res.status(201).json({
+                menssage: "Nome de usuario em uso, tente outro"
+            })
+        }
+        // //criptografar a senha antes de salvar
+        // data.password = await bcrypt.hash(data.password,10)
+
+        //criar um novo registro 
+        userRepository.create(data)
+        //salvar o registro
+        const newUser = await userRepository.save(userRepository.create(data))
+        //resposta de sucesso
+        res.status(201).json({
+            menssage: "novo usuario cadastrado com sucesso",
+            user: newUser
+        })
+
+    }
+    catch (error: any){
+       if(error instanceof yup.ValidationError){
+            res.status(400).json({
+                menssage: error.errors
+            })
+            return
+        }
+        //retorna resposta de erro
+        console.log(error);
+        res.status(500).json({
+            menssage: "erro ao cadastrar usuario"
+        })
+    }
+})
+
 
 //criar rota para recuperar a senha 
 //endereço para acessar a API da aplicação exterrna com o verbo post 
