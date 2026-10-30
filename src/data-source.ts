@@ -13,12 +13,14 @@ dotenv.config();
 
 //?? operador de coalescência nula - 
 // se o valor da esquerda for nulo sera usado o da direita 
-const dialect = process.env.DB_DIALECT ?? "mysql"
+//const dialect = process.env.DB_DIALECT ?? "mysql"
+const type = process.env.DB_TYPE ?? "postgres" 
 
 export const AppDataSource = new DataSource({ 
-    type: dialect as "mysql", //O as no TypeScript serve para forçar o TypeScript a tratar um valor como um determinado tipo, mesmo que ele não tenha certeza disso. "é como dizer:“Eu sei o que estou fazendo. Aceita isso aí.”"  
+    type: type as "postgres",
+    //type: dialect as "mysql", //O as no TypeScript serve para forçar o TypeScript a tratar um valor como um determinado tipo, mesmo que ele não tenha certeza disso. "é como dizer:“Eu sei o que estou fazendo. Aceita isso aí.”"  
     host: process.env.DB_HOST, 
-    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306, 
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432, //3306, 
     username: process.env.DB_USERNAME, 
     password: process.env.DB_PASSWORD, 
     database: process.env.DB_DATABASE, 
