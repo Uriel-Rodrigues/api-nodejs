@@ -155,3 +155,8 @@ instaler os tipos do nodemailer
 ```
 npm instal --save-dev @types/nodemailer
 ```
+
+instalar o modulo para manipular a data
+```
+npm install date-fns
+```

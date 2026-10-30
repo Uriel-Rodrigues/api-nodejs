@@ -3,6 +3,8 @@ import { User } from "../entity/User";
 import { Situation } from "../entity/situation";
 //importar biblioteca para criptografar senha
 import bcrypt from "bcryptjs"
+//importar biblioteca para manipular as datas
+import {subMonths} from "date-fns"
 
 export default class CreateUserSeed {
     public async run(dataSource: DataSource): Promise <void> {
@@ -31,26 +33,80 @@ export default class CreateUserSeed {
                 name: "Luiz", 
                 email:"luis@email.com.br",
                 password:await bcrypt.hash("123456A#s",10),  
-                situation: situation
+                situation: situation,
+                createdAt: subMonths(new Date(), 14)
             },
             {
                 name: "Lucas", 
                 email: "lucas@email.com.br",
                 password:await bcrypt.hash("123456A#s",10), 
-                situation: situation
+                situation: situation,
+                createdAt: subMonths(new Date(), 10)
             },
             {
                 name: "Luiza", 
                 email: "Luiza@email.com.br",
                 password:await bcrypt.hash("123456A#s",10), 
-                situation: situation
+                situation: situation,
+                createdAt: subMonths(new Date(), 13)
             },
             {
                 name: "Amanda", 
                 email: "amanda@email.com.br",
                 password:await bcrypt.hash("123456A#s",10),
-                situation: situation
-            }
+                situation: situation,
+                createdAt: subMonths(new Date(), 5)
+            },
+            {
+                name: "Auan", 
+                email: "luan@email.com.br",
+                password:await bcrypt.hash("123456A#s",10),
+                situation: situation,
+                createdAt: subMonths(new Date(), 2)
+            },
+            {
+                name: "jessica", 
+                email: "jessica@email.com.br",
+                password:await bcrypt.hash("123456A#s",10),
+                situation: situation,
+                createdAt: subMonths(new Date(), 4)
+            },
+            {
+                name: "totoro", 
+                email: "totoro@email.com.br",
+                password:await bcrypt.hash("123456A#s",10),
+                situation: situation,
+                createdAt: subMonths(new Date(), 8)
+            },
+            {
+                name: "Batman", 
+                email: "batman@email.com.br",
+                password:await bcrypt.hash("123456A#s",10),
+                situation: situation,
+                createdAt: subMonths(new Date(), 15)
+            },
+            {
+                name: "Pocarrontas", 
+                email: "pocarrontas@email.com.br",
+                password:await bcrypt.hash("123456A#s",10),
+                situation: situation,
+                createdAt: subMonths(new Date(), 1)
+            },
+            {
+                name: "Peito", 
+                email: "peito@email.com.br",
+                password:await bcrypt.hash("123456A#s",10),
+                situation: situation,
+                createdAt: subMonths(new Date(), 16)
+            },
+            {
+                name: "Donald", 
+                email: "donald@email.com.br",
+                password:await bcrypt.hash("123456A#s",10),
+                situation: situation,
+                createdAt: subMonths(new Date(), 18)
+            },
+
         ]
         // salvar os registros no banco
         await userRepository.save(user)

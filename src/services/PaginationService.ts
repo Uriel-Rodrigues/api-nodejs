@@ -6,8 +6,8 @@ interface PaginationResult<T> {
     data: T[],
     currentPage: number,
     lastPage: number,
-    totalRecords: number
-    relations?: string[] //permite passar reções como array de strings
+    totalRecords: number,
+    relations?: string[] //permite passar expreções como array de strings
 }
 
 //Define uma classe de serviço para implementar a lógica de paginação

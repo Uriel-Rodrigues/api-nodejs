@@ -41,21 +41,22 @@ router.get("/product",verifyToken, async (req: Request, res: Response) => {
 //rota para VISUALIZAR um registro espescifico de produto 
 //verbo - GET
 //router.get("/:id", async (req: Request, res: Response) => {
-router.get("/product/:slug",verifyToken, async (req: Request, res: Response) => {
+router.get("/product/:id",verifyToken, async (req: Request, res: Response) => {
     try{
         //capiturar o endereço ID que vem pela URL
-        //const {id} = req.params
-        //capiturar o endereço slug que vem pela URL
-        const {slug} = req.params
+        const {id} = req.params
+        // capiturar o endereço slug que vem pela URL
+        // const {slug} = req.params
         //obter repositorio da entidade product
         const productRepository = AppDataSource.getRepository(Product)
         //procurar produto pelo ID
-        //const existeProduct = await productRepository.findOneBy({id: parseInt(id)})
+        const existeProduct = await productRepository.findOneBy({id: parseInt(id)})
         //procurar produto pelo slug
-        const existeProduct = await productRepository.findOne({
-            relations:["category","situation"],
-            where: {slug}
-        }) 
+        // const existeProduct = await productRepository.findOne({
+        //     relations:["category","situation"],
+        //     where: {slug}
+        // }) 
+
         //verificar se o produto existe 
         if(!existeProduct) {
             res.status(404).json({
@@ -69,7 +70,7 @@ router.get("/product/:slug",verifyToken, async (req: Request, res: Response) => 
     catch(error:any){
         console.log(error)
         res.status(500).json({
-            menssage: "erro ao carregar situação"
+            menssage: "erro ao carregar Produto"
         })
     }
 })

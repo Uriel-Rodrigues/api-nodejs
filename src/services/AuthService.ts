@@ -12,7 +12,7 @@ dotenv.config()
 //classe responsavel pela autrenticação do usuario 
 export class AuthService {
 
-    //criar um re´positorio para manipular a tabela user
+    //criar um repositorio para manipular a tabela user
     private userRepository = AppDataSource.getRepository(User)
 
     /**

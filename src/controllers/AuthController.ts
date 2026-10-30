@@ -29,7 +29,7 @@ const router = express.Router();
     "email":"user@email.com.br"
     "password":"123456A#s"
 */
-router.post("/auth", async (req: Request, res: Response) => {
+router.post("/", async (req: Request, res: Response) => {
     try {
         //recuperar o dados que vem atraves do corpo da requisição
         const {email, password} = req.body

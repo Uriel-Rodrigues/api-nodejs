@@ -72,7 +72,7 @@ router.get("/user/:id", async(req: Request, res: Response) => {
 })
 
 //rota para CADASTRAR um usuario - verpo POST
-router.post("/user/create",verifyToken, async (req: Request, res: Response) => {
+router.post("/user/create", async (req: Request, res: Response) => {
     try {
         //receber os dados que vem no corpo da requisição
         var data = req.body 

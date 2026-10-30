@@ -23,7 +23,7 @@ import SituationController from "./controllers/SituationController"
 import ProductCategoriesController from "./controllers/ProductCategoriesController"
 import ProductSituationsController from "./controllers/ProductSituationsController"
 import ProctController from "./controllers/ProductController"
-
+import ReportsController from "./controllers/ReportsController"
 
 //criar as rotas
 app.get("/", (req, res) => {
@@ -36,6 +36,7 @@ app.use('/', SituationController);
 app.use('/', ProductCategoriesController);
 app.use('/', ProductSituationsController);
 app.use('/', ProctController)
+app.use('/', ReportsController)
 
 
 //Iiciar o servidor na porta 8080
