@@ -40,7 +40,7 @@ router.get("/users-report", verifyToken,  async(req: Request, res: Response) => 
         const result = await userRepository
             .createQueryBuilder("user")
             .select([
-                `DATE_FORMAT(user.createdAt, '%Y-%m') AS month`,
+                `TO_CHAR(user.createdAt, 'YYYY-MM') AS month`,
                 `COUNT(user.id) AS users`
             ])
         //filtrar os registros para considerar apenas usuarios criados a partir da data nicial 
@@ -94,7 +94,7 @@ router.get("/products-report", verifyToken,  async(req: Request, res: Response) 
         const result = await productRepository
             .createQueryBuilder("product")
             .select([
-                `DATE_FORMAT(product.createdAt, '%Y-%m') AS month`,
+                `TO_CHAR(product.createdAt, 'YYYY-MM') AS month`,
                 `COUNT(product.id) AS products`
             ])
         //filtrar os registros para considerar apenas usuarios criados a partir da data nicial 
