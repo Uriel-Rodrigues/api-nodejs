@@ -78,7 +78,9 @@ router.get("/product/:id",verifyToken, async (req: Request, res: Response) => {
 //criar rota para CADASTRAR um novo produto 
 //verbo POST
 router.post("/product/create",verifyToken, async (req: Request, res: Response) => {
+
     try{
+        console.log("Iniciando cadastro...");
         //receber os dados que vem do corpo da requisção
         var data = req.body
         //verificar os dados usando yup
@@ -109,7 +111,7 @@ router.post("/product/create",verifyToken, async (req: Request, res: Response) =
         await schema.validate(data, {abortEarly:false})
 
         //gerar slug automaticamente com base no nome
-        data.slug = slugify(data.slug, {lower : true, strict: true})
+        data.slug = slugify(data.name, {lower : true, strict: true})
         
         //obter repositorio da entidade Product
         const productRepository = AppDataSource.getRepository(Product) 

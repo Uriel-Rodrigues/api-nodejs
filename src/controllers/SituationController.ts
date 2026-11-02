@@ -115,7 +115,7 @@ router.post("/situation/create",verifyToken, async (req: Request, res: Response)
             situation: newSituation
         });
     }
-    catch (error){
+    catch (error:any){
         //retornar mensagem de erro durante a validação
         if(error instanceof yup.ValidationError){
             //retornar error de validação
