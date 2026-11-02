@@ -89,7 +89,6 @@ router.post("/product/create",verifyToken, async (req: Request, res: Response) =
             .min(3, "o nome do produto precisa de no minimo 3 caracteres"),
             slug: yup
             .string()
-            .required("o campo slug é obrigatorio")
             .min(3, "o campo slug deve ter no minimo 3 caracteres"!)
             .max(255, "o campo slux deve ter no maximo 255 caracteres!"),
             description: yup
